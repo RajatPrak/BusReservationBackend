@@ -1,0 +1,27 @@
+package com.example.reservationudemy.services;
+
+import com.example.reservationudemy.entities.AppUsers;
+import com.example.reservationudemy.repos.AppUserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
+public class CustomerUserDetailsService implements UserDetailsService {
+
+    @Autowired
+    private AppUserRepository appUserRepository;
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        final AppUsers appUsers = appUserRepository.findByUserName(username)
+                .orElseThrow(()-> new UsernameNotFoundException("User does not exist"));
+        return User.builder()
+                .username(appUsers.getUserName())
+                .password(appUsers.getPassword())
+                .roles(appUsers.getRole())
+                .build();
+    }
+
+}
