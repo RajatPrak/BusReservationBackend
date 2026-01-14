@@ -1,6 +1,6 @@
 package com.example.reservationudemy.controller;
 
-import com.example.reservationudemy.entities.AppUsers;
+import com.example.reservationudemy.dto.LoginRequest;
 import com.example.reservationudemy.models.AuthResponseModel;
 import com.example.reservationudemy.security.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,15 +29,32 @@ public class AuthController {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
-    @PostMapping
-    public ResponseEntity<AuthResponseModel>login(@RequestBody AppUsers user){
-        final AuthResponseModel authResponseModel;
-        final Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                user.getUserName(),user.getPassword()
-        ));
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponseModel> login(
+            @RequestBody LoginRequest request
+            ) {
+        Authentication authentication =
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                request.getUserName(),
+                                request.getPassword()
+                        )
+                );
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
+
         String token = jwtTokenProvider.generateToken(authentication);
-        authResponseModel = new AuthResponseModel(HttpStatus.OK.value(), "Successfully Login",token,System.currentTimeMillis(),expiration);
-        return ResponseEntity.ok(authResponseModel);
+
+        AuthResponseModel response =
+                new AuthResponseModel(
+                        HttpStatus.OK.value(),
+                        "Successfully Login",
+                        token,
+                        System.currentTimeMillis(),
+                        expiration
+                );
+
+        return ResponseEntity.ok(response);
     }
 }
+
